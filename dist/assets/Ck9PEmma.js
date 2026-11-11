@@ -1,0 +1,1 @@
+import{n as e}from"./CAIM295j.js";import{Et as t,I as n,kt as r,p as i,st as a,y as o}from"./BUahj7nQ.js";var s=Object.assign(o({__name:`RoleBadge`,props:{papel:{}},setup(o){return(s,c)=>(n(),i(`span`,{class:t([`badge`,`role-`+o.papel])},r((`PAPEL`in s?s.PAPEL:a(e))[o.papel]??o.papel),3))}}),{__name:`RoleBadge`});export{s as t};

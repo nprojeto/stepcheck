@@ -1,0 +1,1 @@
+import{I as e,g as t,p as n,t as r,u as i}from"./BUahj7nQ.js";var a={},o={class:`loading`};function s(r,a){return e(),n(`div`,o,[...a[0]||=[i(`span`,{class:`spinner`},null,-1),t(` Carregando…`,-1)]])}var c=Object.assign(r(a,[[`render`,s]]),{__name:`LoadingBox`});export{c as t};
