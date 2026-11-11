@@ -34,7 +34,7 @@ export default defineNuxtConfig({
       supabaseUrl: 'https://xtwtadqaemupspbopxnk.supabase.co',
       // Chave PÚBLICA (publishable/anon). Nunca colocar a chave secreta aqui.
       supabaseKey: 'sb_publishable_qT68jAUaVStjrimuDYHMig_20Hn30tR',
-      versao: '1.1.0',
+      versao: '1.2.0',
     },
   },
   nitro: { preset: 'static' },

@@ -1,15 +1,22 @@
 <script setup lang="ts">
 import { Plus, Search, Users, ListChecks, FolderKanban, FlaskConical, ShieldCheck, Wrench, ArrowRight } from 'lucide-vue-next'
 const me = useMe()
-const lista = ref<any[]>([])
+const lista = ref<any[]>(apiCache('/projetos') ?? [])
 const pend = ref<Record<string, { testar: number; testando: number; aprovar: number }>>({})
-const carregando = ref(true)
+const carregando = ref(!apiCache('/projetos'))
 const busca = ref('')
 const filtroStatus = ref('')
 const novo = ref(false)
 
+function contarPendencias(testes: any[], aprov: any[]) {
+  const p: Record<string, any> = {}
+  const get = (id: string) => (p[id] ??= { testar: 0, testando: 0, aprovar: 0 })
+  testes.forEach((e) => { if (e.comigo) get(e.project_id).testando++; else if (e.posso_puxar) get(e.project_id).testar++ })
+  aprov.forEach((e) => { if (e.posso_decidir) get(e.project_id).aprovar++ })
+  pend.value = p
+}
+if (apiCache('/painel/testes')) contarPendencias(apiCache('/painel/testes'), apiCache('/painel/aprovacoes') ?? [])
 async function carregar() {
-  carregando.value = true
   try {
     const [projetos, testes, aprov] = await Promise.all([
       api<any[]>('/projetos'),
@@ -17,11 +24,9 @@ async function carregar() {
       api<any[]>('/painel/aprovacoes').catch(() => []),
     ])
     lista.value = projetos
-    const p: Record<string, any> = {}
-    const get = (id: string) => (p[id] ??= { testar: 0, testando: 0, aprovar: 0 })
-    testes.forEach((e) => { if (e.comigo) get(e.project_id).testando++; else if (e.posso_puxar) get(e.project_id).testar++ })
-    aprov.forEach((e) => { if (e.posso_decidir) get(e.project_id).aprovar++ })
-    pend.value = p
+    contarPendencias(testes, aprov)
+    // deixa os projetos prontos para abrir na hora
+    projetos.slice(0, 8).forEach((p) => preCarregar('/projetos/' + p.id))
   } catch (e) { toastErro(e) } finally { carregando.value = false }
 }
 onMounted(carregar)

@@ -3,13 +3,14 @@ import { Download, ChevronLeft, ChevronRight } from 'lucide-vue-next'
 const projeto = useProjeto()
 const pid = computed(() => projeto.value!.projeto.id)
 const f = reactive({ de: '', ate: '' })
-const r = ref<any>({ total: 0, itens: [] })
 const pagina = ref(0)
 const tam = 50
-const carregando = ref(true)
+const consulta = () => ({ project_id: pid.value, de: f.de, ate: f.ate, limit: tam, offset: pagina.value * tam })
+const r = ref<any>(apiCache('/historico', consulta()) ?? { total: 0, itens: [] })
+const carregando = ref(!apiCache('/historico', consulta()))
 async function carregar() {
-  carregando.value = true
-  try { r.value = await api('/historico', { query: { project_id: pid.value, de: f.de, ate: f.ate, limit: tam, offset: pagina.value * tam } }) }
+  if (!apiCache('/historico', consulta())) carregando.value = true
+  try { r.value = await api('/historico', { query: consulta() }) }
   catch (e) { toastErro(e) } finally { carregando.value = false }
 }
 onMounted(carregar)

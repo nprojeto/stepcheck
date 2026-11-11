@@ -12,6 +12,7 @@ async function entrar() {
   erro.value = ''
   if (!email.value || !senha.value) { erro.value = 'Informe e-mail e senha.'; return }
   carregando.value = true
+  limparCache()
   try {
     const { error } = await useSupabase().auth.signInWithPassword({ email: email.value.trim().toLowerCase(), password: senha.value })
     if (error) {

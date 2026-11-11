@@ -2,10 +2,10 @@
 import { ShieldCheck, ArrowRight } from 'lucide-vue-next'
 const projeto = useProjeto()
 const pid = computed(() => projeto.value!.projeto.id)
-const lista = ref<any[]>([])
-const carregando = ref(true)
+const lista = ref<any[]>(apiCache('/painel/aprovacoes', { project_id: pid.value }) ?? [])
+const carregando = ref(!apiCache('/painel/aprovacoes', { project_id: pid.value }))
 onMounted(async () => {
-  try { lista.value = (await api<any[]>('/painel/aprovacoes')).filter((e) => e.project_id === pid.value) }
+  try { lista.value = await api<any[]>('/painel/aprovacoes', { query: { project_id: pid.value } }) }
   catch (e) { toastErro(e) } finally { carregando.value = false }
 })
 const minhas = computed(() => lista.value.filter((e) => e.posso_decidir))

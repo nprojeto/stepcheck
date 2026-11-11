@@ -3,21 +3,24 @@ import { ListChecks, Clock3, FlaskConical, ShieldCheck, XCircle, CheckCircle2, F
 const projeto = useProjeto()
 const pid = computed(() => projeto.value!.projeto.id)
 const pend = ref({ testar: 0, testando: 0, aprovar: 0 })
-const atividades = ref<any[]>([])
+const atividades = ref<any[]>(apiCache('/historico', { project_id: pid.value, limit: 8 })?.itens ?? [])
+function contar(t: any[], aprov: any[]) {
+  pend.value = {
+    testando: t.filter((e) => e.comigo).length,
+    testar: t.filter((e) => e.posso_puxar).length,
+    aprovar: aprov.filter((e) => e.posso_decidir).length,
+  }
+}
+if (apiCache('/painel/testes', { project_id: pid.value })) contar(apiCache('/painel/testes', { project_id: pid.value }), apiCache('/painel/aprovacoes', { project_id: pid.value }) ?? [])
 
 async function carregarExtras() {
   try {
     const [testes, aprov, hist] = await Promise.all([
-      api<any[]>('/painel/testes').catch(() => []),
-      api<any[]>('/painel/aprovacoes').catch(() => []),
+      api<any[]>('/painel/testes', { query: { project_id: pid.value } }).catch(() => []),
+      api<any[]>('/painel/aprovacoes', { query: { project_id: pid.value } }).catch(() => []),
       api<any>('/historico', { query: { project_id: pid.value, limit: 8 } }).catch(() => ({ itens: [] })),
     ])
-    const t = testes.filter((e) => e.project_id === pid.value)
-    pend.value = {
-      testando: t.filter((e) => e.comigo).length,
-      testar: t.filter((e) => e.posso_puxar).length,
-      aprovar: aprov.filter((e) => e.project_id === pid.value && e.posso_decidir).length,
-    }
+    contar(testes, aprov)
     atividades.value = hist.itens
   } catch (e) { toastErro(e) }
 }

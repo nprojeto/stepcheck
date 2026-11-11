@@ -9,6 +9,10 @@ const id = computed(() => route.params.etapa as string)
 const d = ref<any>(null)
 const proj = useProjeto()
 const carregando = ref(true)
+function doCache() {
+  const c = apiCache('/etapas/' + route.params.etapa)
+  if (c) { d.value = c; carregando.value = false }
+}
 const ocupado = ref(false)
 
 async function carregar() {
@@ -19,8 +23,8 @@ async function carregar() {
     if (!d.value?.execucao_atual) formExec.value = ''
   } catch (e) { toastErro(e) } finally { carregando.value = false }
 }
-onMounted(carregar)
-watch(id, () => { carregando.value = true; carregar() })
+onMounted(() => { doCache(); carregar() })
+watch(id, () => { d.value = null; carregando.value = true; doCache(); carregar() })
 
 const e = computed(() => d.value?.etapa)
 const pode = computed(() => d.value?.pode ?? {})

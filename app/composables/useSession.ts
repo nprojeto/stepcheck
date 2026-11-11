@@ -21,6 +21,7 @@ export async function loadMe(): Promise<Me | null> {
 }
 
 export async function logout() {
+  limparCache()
   await useSupabase().auth.signOut()
   useMe().value = null
   await navigateTo('/login')

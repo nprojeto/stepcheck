@@ -2,8 +2,8 @@
 import { BarChart3, Download, Printer, CheckCircle2, ListChecks, XCircle, FlaskConical, Repeat } from 'lucide-vue-next'
 const projeto = useProjeto()
 const pid = computed(() => projeto.value!.projeto.id)
-const r = ref<any>(null)
-const carregando = ref(true)
+const r = ref<any>(apiCache(`/projetos/${pid.value}/relatorio`) ?? null)
+const carregando = ref(!r.value)
 const abertos = ref<Record<string, boolean>>({})
 onMounted(async () => {
   try { r.value = await api(`/projetos/${pid.value}/relatorio`) } catch (e) { toastErro(e) } finally { carregando.value = false }

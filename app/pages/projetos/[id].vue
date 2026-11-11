@@ -11,7 +11,13 @@ async function carregar() {
   erro.value = ''
   try { await carregarProjeto(id.value) } catch (e: any) { erro.value = e.message }
 }
-watch(id, () => { projeto.value = null; carregar() }, { immediate: true })
+watch(id, () => {
+  projeto.value = apiCache('/projetos/' + id.value) ?? null
+  carregar()
+  // pré-carrega as telas mais usadas do projeto
+  preCarregar('/painel/testes', { project_id: id.value })
+  preCarregar('/painel/aprovacoes', { project_id: id.value })
+}, { immediate: true })
 onUnmounted(() => { projeto.value = null })
 
 const total = computed(() => projeto.value?.etapas.length ?? 0)

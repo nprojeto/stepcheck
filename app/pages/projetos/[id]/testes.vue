@@ -2,13 +2,13 @@
 import { FlaskConical, Play, Lock, ArrowRight, Search } from 'lucide-vue-next'
 const projeto = useProjeto()
 const pid = computed(() => projeto.value!.projeto.id)
-const lista = ref<any[]>([])
-const carregando = ref(true)
+const lista = ref<any[]>(apiCache('/painel/testes', { project_id: pid.value }) ?? [])
+const carregando = ref(!apiCache('/painel/testes', { project_id: pid.value }))
 const ocupado = ref('')
 const busca = ref('')
 const modulo = ref('')
 async function carregar() {
-  try { lista.value = (await api<any[]>('/painel/testes')).filter((e) => e.project_id === pid.value) }
+  try { lista.value = await api<any[]>('/painel/testes', { query: { project_id: pid.value } }) }
   catch (e) { toastErro(e) } finally { carregando.value = false }
 }
 onMounted(carregar)

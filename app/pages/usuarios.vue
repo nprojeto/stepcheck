@@ -2,8 +2,8 @@
 import { UserPlus, Search, Pencil, KeyRound, Save, RefreshCw, Copy, ShieldCheck } from 'lucide-vue-next'
 definePageMeta({ admin: true })
 const me = useMe()
-const lista = ref<any[]>([])
-const carregando = ref(true)
+const lista = ref<any[]>(apiCache('/usuarios') ?? [])
+const carregando = ref(!apiCache('/usuarios'))
 const busca = ref('')
 const mostrarInativos = ref(false)
 async function carregar() {
