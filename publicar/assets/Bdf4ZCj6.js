@@ -1,0 +1,1 @@
+import{p as e}from"#entry";var t=e(`/img/logo-slogan-azul.png`);export{t};

@@ -1,0 +1,15 @@
+STEPCHECK — frontend.zip (versão 1.0.0)
+NOVALE — Transformando ideias em soluções inteligentes.
+
+CONTEÚDO
+- publicar/       → site pronto. Todo o conteúdo DESTA pasta vai para o repositório
+                    https://github.com/nprojeto/stepcheck (na raiz, sem a pasta "publicar").
+- codigo-fonte/   → código Nuxt/Vue usado para gerar o site (guardado para as próximas versões).
+                    NÃO precisa ser enviado ao GitHub.
+
+ENDEREÇO DO SISTEMA
+https://nprojeto.github.io/stepcheck/
+
+SEGURANÇA
+O site contém apenas a chave PÚBLICA do Supabase. A chave secreta (service_role)
+fica somente no Supabase. O arquivo schema.sql NÃO deve ser enviado ao GitHub.
