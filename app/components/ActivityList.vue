@@ -23,7 +23,7 @@ function detalhe(i: any) {
             <span v-else>{{ acaoAuditoria(i.acao) }}</span>
           </td>
           <td>
-            <NuxtLink v-if="i.etapa" :to="'/etapas/' + i.etapa.id">#{{ i.etapa.codigo }} {{ i.etapa.nome }}</NuxtLink>
+            <NuxtLink v-if="i.etapa" :to="rotaProjeto(i.project_id, 'etapas/' + i.etapa.id)">#{{ i.etapa.codigo }} {{ i.etapa.nome }}</NuxtLink>
             <span v-else class="muted">{{ i.entidade }}</span>
           </td>
           <td class="small">{{ detalhe(i) }}</td>

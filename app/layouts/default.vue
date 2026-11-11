@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import {
   LayoutDashboard, FolderKanban, ListChecks, FlaskConical, ShieldCheck, BarChart3, History,
-  Users, UserCircle2, LogOut, Menu, Bell, X, ChevronDown,
+  Users, UserCircle2, LogOut, Menu, Bell, X, ChevronDown, ArrowLeft, UsersRound,
 } from 'lucide-vue-next'
 
 const me = useMe()
@@ -10,20 +10,34 @@ const aberto = ref(false)
 const menuUser = ref(false)
 const cfg = useRuntimeConfig().public
 
-const itens = computed(() => {
-  const l = [
-    { to: '/', label: 'Dashboard', icon: LayoutDashboard },
-    { to: '/projetos', label: 'Projetos', icon: FolderKanban },
-    { to: '/etapas', label: 'Etapas', icon: ListChecks },
-    { to: '/testes', label: 'Painel de testes', icon: FlaskConical },
-    { to: '/aprovacoes', label: 'Painel de aprovações', icon: ShieldCheck },
-    { to: '/relatorios', label: 'Relatórios', icon: BarChart3 },
-    { to: '/historico', label: 'Histórico de atividades', icon: History },
-  ]
+// Menu geral (fora de projeto)
+const itensGerais = computed(() => {
+  const l = [{ to: '/', label: 'Projetos', icon: FolderKanban }]
   if (me.value?.usuario.is_admin) l.push({ to: '/usuarios', label: 'Usuários', icon: Users })
   return l
 })
-const ativo = (to: string) => (to === '/' ? route.path === '/' : route.path.startsWith(to))
+// Menu do projeto aberto
+const projeto = useProjeto()
+const pid = computed(() => (route.params.id as string) || null)
+const itensProjeto = computed(() => {
+  if (!pid.value) return []
+  const papeis: string[] = projeto.value?.projeto.id === pid.value ? projeto.value.meus_papeis : []
+  const adm = !!me.value?.usuario.is_admin
+  const b = '/projetos/' + pid.value
+  const l = [
+    { to: b, label: 'Visão geral', icon: LayoutDashboard, exato: true },
+    { to: b + '/etapas', label: 'Etapas', icon: ListChecks },
+  ]
+  if (adm || papeis.includes('testador') || papeis.includes('disponibilizador')) l.push({ to: b + '/testes', label: 'Painel de testes', icon: FlaskConical })
+  if (adm || papeis.includes('aprovador') || papeis.includes('disponibilizador')) l.push({ to: b + '/aprovacoes', label: 'Painel de aprovações', icon: ShieldCheck })
+  l.push(
+    { to: b + '/relatorios', label: 'Relatórios', icon: BarChart3 },
+    { to: b + '/historico', label: 'Histórico de atividades', icon: History },
+    { to: b + '/equipe', label: 'Equipe', icon: UsersRound },
+  )
+  return l
+})
+const ativo = (to: string, exato = false) => (exato || to === '/' ? route.path === to : route.path.startsWith(to))
 watch(() => route.fullPath, () => { aberto.value = false; menuUser.value = false })
 
 const iniciais = computed(() => (me.value?.usuario.nome ?? '?').split(' ').filter(Boolean).slice(0, 2).map((p) => p[0]).join('').toUpperCase())
@@ -51,8 +65,8 @@ async function abrirItem(n: any) {
     api('/notificacoes/lidas', { method: 'POST', body: { ids: [n.id] } }).catch(() => {})
     if (me.value && me.value.notificacoes_nao_lidas > 0) me.value.notificacoes_nao_lidas--
   }
-  if (n.step_id) navigateTo('/etapas/' + n.step_id)
-  else if (n.project_id) navigateTo('/projetos/' + n.project_id)
+  if (n.step_id && n.project_id) navigateTo(rotaProjeto(n.project_id, 'etapas/' + n.step_id))
+  else if (n.project_id) navigateTo(rotaProjeto(n.project_id))
 }
 let timer: any
 onMounted(() => { timer = setInterval(() => loadMe().catch(() => {}), 60000) })
@@ -68,7 +82,21 @@ onUnmounted(() => clearInterval(timer))
         <button class="fechar btn ghost icon sm" @click="aberto = false"><X :size="18" /></button>
       </div>
       <nav>
-        <NuxtLink v-for="i in itens" :key="i.to" :to="i.to" class="nav" :class="{ on: ativo(i.to) }">
+        <template v-if="pid">
+          <NuxtLink to="/" class="voltar"><ArrowLeft :size="15" /> Todos os projetos</NuxtLink>
+          <div class="proj">
+            <ProjectIcon :src="projeto?.projeto.id === pid ? projeto.projeto.icone_url : null" />
+            <div class="grow" style="min-width:0">
+              <div class="pnome">{{ projeto?.projeto.id === pid ? projeto.projeto.nome : 'Carregando…' }}</div>
+              <div class="ppapel">{{ me?.usuario.is_admin ? 'Administrador' : (projeto?.meus_papeis ?? []).map((p: string) => PAPEL[p]).join(' · ') }}</div>
+            </div>
+          </div>
+          <NuxtLink v-for="i in itensProjeto" :key="i.to" :to="i.to" class="nav" :class="{ on: ativo(i.to, i.exato) }">
+            <component :is="i.icon" :size="18" /> <span>{{ i.label }}</span>
+          </NuxtLink>
+          <div class="sep" />
+        </template>
+        <NuxtLink v-for="i in itensGerais" v-show="!pid || i.to !== '/'" :key="i.to" :to="i.to" class="nav" :class="{ on: ativo(i.to) }">
           <component :is="i.icon" :size="18" /> <span>{{ i.label }}</span>
         </NuxtLink>
       </nav>
@@ -142,6 +170,13 @@ nav { padding: 12px 10px; display: flex; flex-direction: column; gap: 2px; flex:
 .nav:hover { background: rgba(255,255,255,.07); color: #fff; }
 .nav.on { background: #fff; color: var(--navy); font-weight: 700; box-shadow: 0 2px 8px rgba(0,0,0,.15); }
 .nav.on svg { color: var(--brand); }
+.voltar { display: flex; align-items: center; gap: 7px; padding: 6px 12px; color: #9FB0D6; font-size: 12.5px; font-weight: 600; text-decoration: none !important; border-radius: 8px; }
+.voltar:hover { color: #fff; background: rgba(255,255,255,.07); }
+.proj { display: flex; align-items: center; gap: 10px; margin: 6px 4px 10px; padding: 10px; border-radius: 10px; background: rgba(255,255,255,.08); border: 1px solid rgba(255,255,255,.12); }
+.proj .pico { border: 0; }
+.pnome { font-family: var(--font-title); font-weight: 700; font-size: 14px; color: #fff; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.ppapel { font-size: 11px; color: #9FB0D6; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.sep { height: 1px; background: rgba(255,255,255,.1); margin: 10px 4px; }
 .rodape { padding: 14px 18px; border-top: 1px solid rgba(255,255,255,.1); display: flex; flex-direction: column; gap: 6px; font-size: 11px; color: #8FA0C8; }
 .rodape img { width: 30px; opacity: .8; }
 .main-wrap { margin-left: var(--sidebar-w); min-height: 100vh; display: flex; flex-direction: column; }
