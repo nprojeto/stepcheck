@@ -1,18 +1,8 @@
-STEPCHECK — frontend.zip (versão 1.0.0)
-NOVALE — Transformando ideias em soluções inteligentes.
+STEPCHECK — atualização 1.1.0 (navegação por projeto)
 
-CONTEÚDO
-- repositorio/  → TODO o conteúdo desta pasta vai para a raiz do repositório
-                  https://github.com/nprojeto/stepcheck
-                  O GitHub Actions gera e publica o site automaticamente a cada envio.
+Envie o CONTEÚDO da pasta "repositorio" para a raiz do repositório
+https://github.com/nprojeto/stepcheck  (Add file > Upload files > arraste a pasta "app"
+e o arquivo "nuxt.config.ts"). Os arquivos com o mesmo nome são substituídos.
+Nada precisa ser apagado.
 
-ENDEREÇO DO SISTEMA
-https://nprojeto.github.io/stepcheck/
-
-ATUALIZAÇÕES
-Nas próximas versões serão enviados apenas os arquivos alterados, na mesma estrutura
-de pastas. Basta enviá-los ao GitHub (Add file > Upload files) que o site é republicado.
-
-SEGURANÇA
-O site contém apenas a chave PÚBLICA do Supabase. A chave secreta (service_role)
-fica somente no Supabase. O arquivo schema.sql NÃO deve ser enviado ao GitHub.
+21 arquivos alterados/novos.
