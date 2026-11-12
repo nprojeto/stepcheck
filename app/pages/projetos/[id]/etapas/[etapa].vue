@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import {
   ArrowLeft, Send, Play, Undo2, Wrench, RotateCcw, Pencil, Trash2, Users, Save, CheckCircle2, XCircle,
-  ClipboardCheck, ShieldCheck, Lock, Timer, History, Paperclip, FileText, ListChecks, Info, MinusCircle, ChevronDown,
+  ClipboardCheck, ShieldCheck, Lock, Timer, History, Paperclip, FileText, ListChecks, Info, MinusCircle, ChevronDown, Archive, ArchiveRestore,
 } from 'lucide-vue-next'
 
 const route = useRoute()
@@ -113,7 +113,7 @@ const resp = (p: string) => (d.value?.responsaveis ?? []).filter((r: any) => r.p
 const doProjeto = (p: string) => (proj.value?.membros ?? []).filter((m: any) => m.papel === p)
 
 const editar = ref(false)
-const isAdmin = computed(() => !!useMe().value?.usuario.is_admin)
+const isAdmin = computed(() => !!d.value?.pode.admin_projeto)
 const editarResp = ref(false)
 function salvoForm() { editar.value = false; editarResp.value = false; carregar(); carregarProjeto(e.value.project_id).catch(() => {}) }
 const fasesOrdenadas = computed(() => STATUS_ORDEM.filter((s) => d.value?.tempo_por_fase_ms?.[s]))
@@ -149,13 +149,20 @@ const totalMs = computed(() => Object.values(d.value?.tempo_por_fase_ms ?? {}).r
           <button v-if="pode.devolver_teste" class="btn secondary" @click="abrir('devolver')"><Undo2 :size="16" /> Devolver à fila</button>
           <button v-if="pode.reabrir" class="btn secondary" @click="abrir('reabrir')"><RotateCcw :size="16" /> Reabrir</button>
           <button v-if="pode.excluir" class="btn ghost" @click="excluir"><Trash2 :size="16" /> Excluir</button>
+          <button v-if="pode.arquivar" class="btn ghost danger-txt" @click="abrir('arquivar')"><Trash2 :size="16" /> Excluir etapa</button>
+          <button v-if="pode.restaurar" class="btn success" :disabled="ocupado" @click="acao('restaurar', {}, 'Etapa restaurada.')"><ArchiveRestore :size="16" /> Restaurar etapa</button>
         </div>
-        <div v-if="e.status === 'reprovado' && d.decisoes.length" class="alert danger mt">
+        <div v-if="e.arquivada" class="alert danger mt">
+          <Archive :size="18" />
+          <div><b>Etapa excluída (arquivada)</b> em {{ dataHora(e.arquivada_em) }}. Motivo: <span class="pre">{{ e.motivo_arquivamento }}</span><br />
+            <span class="small">Ela não aparece nas listas, painéis e relatórios, mas o histórico está preservado.<template v-if="pode.restaurar"> Use "Restaurar etapa" para trazê-la de volta.</template></span></div>
+        </div>
+        <div v-if="e.status === 'reprovado' && d.decisoes.length && !e.arquivada" class="alert danger mt">
           <XCircle :size="18" />
           <div><b>Reprovada por {{ d.decisoes[d.decisoes.length - 1].aprovador_nome }}:</b> <span class="pre">{{ d.decisoes[d.decisoes.length - 1].justificativa }}</span></div>
         </div>
         <div v-if="e.status === 'em_correcao'" class="alert warn mt"><Wrench :size="18" /><span>Etapa em correção. Ao terminar, clique em <b>Redisponibilizar para teste</b> e descreva o que foi corrigido.</span></div>
-        <div v-if="euTestei" class="alert info mt"><Info :size="18" /><span>Você executou este teste e, por isso, não pode aprovar ou reprovar esta tentativa.</span></div>
+        <div v-if="euTestei && !pode.decidir" class="alert info mt"><Info :size="18" /><span>Você executou este teste e, por isso, não pode aprovar ou reprovar esta tentativa.</span></div>
       </div>
 
       <!-- Registro do teste -->
@@ -297,7 +304,7 @@ const totalMs = computed(() => Object.values(d.value?.tempo_por_fase_ms ?? {}).r
 
           <div class="card">
             <div class="section-title"><Paperclip :size="15" /> Documentos da etapa</div>
-            <AttachmentList :anexos="anexosEtapa" :step-id="e.id" contexto="etapa" :pode-enviar="(d.meus_papeis.includes('disponibilizador') || isAdmin) && e.status !== 'aprovado'" @enviado="carregar" />
+            <AttachmentList :anexos="anexosEtapa" :step-id="e.id" contexto="etapa" :pode-enviar="(d.meus_papeis.includes('disponibilizador') || isAdmin) && e.status !== 'aprovado' && !e.arquivada" @enviado="carregar" />
           </div>
 
           <div class="card">
@@ -338,6 +345,14 @@ const totalMs = computed(() => Object.values(d.value?.tempo_por_fase_ms ?? {}).r
         <template #footer>
           <button class="btn secondary" @click="modal = ''">Cancelar</button>
           <button class="btn" :disabled="ocupado" @click="acao('devolver_teste', { motivo: texto }, 'Etapa devolvida à fila.')"><Undo2 :size="16" /> Devolver</button>
+        </template>
+      </AppModal>
+      <AppModal :open="modal === 'arquivar'" titulo="Excluir etapa" @close="modal = ''">
+        <div class="alert warn mb"><Archive :size="18" /><span>A etapa sai das listas, painéis e relatórios. Os testes, decisões e anexos ficam guardados no histórico, e um administrador do projeto pode restaurá-la.</span></div>
+        <div class="field"><label class="req">Motivo da exclusão</label><textarea v-model="texto" class="textarea" rows="3" /></div>
+        <template #footer>
+          <button class="btn secondary" @click="modal = ''">Cancelar</button>
+          <button class="btn danger" :disabled="ocupado" @click="acao('arquivar', { motivo: texto }, 'Etapa excluída (arquivada).').then((ok) => ok && navigateTo(rotaProjeto(e.project_id, 'etapas')))"><Trash2 :size="16" /> Excluir</button>
         </template>
       </AppModal>
       <AppModal :open="modal === 'reabrir'" titulo="Reabrir etapa aprovada" @close="modal = ''">

@@ -16,7 +16,7 @@ const filtra = (l: any[]) => l.filter((e) => (!busca.value || (e.nome + ' #' + e
 const comigo = computed(() => filtra(lista.value.filter((e) => e.comigo)))
 const disponiveis = computed(() => filtra(lista.value.filter((e) => e.status === 'disponibilizado')))
 const comOutros = computed(() => filtra(lista.value.filter((e) => e.status === 'em_execucao' && !e.comigo)))
-const ehTestador = computed(() => projeto.value?.meus_papeis.includes('testador'))
+const ehTestador = computed(() => projeto.value?.meus_papeis.includes('testador') || projeto.value?.pode.admin_projeto)
 const link = (e: any) => rotaProjeto(pid.value, 'etapas/' + e.id)
 async function puxar(e: any) {
   ocupado.value = e.id

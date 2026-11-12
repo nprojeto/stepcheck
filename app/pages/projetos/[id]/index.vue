@@ -33,7 +33,7 @@ const porStatus = computed(() => {
   return t
 })
 const total = computed(() => etapas.value.length)
-const corrigir = computed(() => projeto.value?.meus_papeis.includes('disponibilizador') ? (porStatus.value.reprovado ?? 0) + (porStatus.value.em_correcao ?? 0) : 0)
+const corrigir = computed(() => (projeto.value?.meus_papeis.includes('disponibilizador') || projeto.value?.pode.admin_projeto) ? (porStatus.value.reprovado ?? 0) + (porStatus.value.em_correcao ?? 0) : 0)
 const temPendencia = computed(() => pend.value.testar || pend.value.testando || pend.value.aprovar || corrigir.value)
 const modulos = computed(() => {
   const m: { nome: string; total: number; aprov: number; por: Record<string, number> }[] = []

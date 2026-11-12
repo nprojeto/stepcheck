@@ -33,7 +33,7 @@ onMounted(carregar)
 
 const filtrados = computed(() => lista.value.filter((p) =>
   (!busca.value || p.nome.toLowerCase().includes(busca.value.toLowerCase())) && (!filtroStatus.value || p.status === filtroStatus.value)))
-const corrigir = (p: any) => p.meus_papeis.includes('disponibilizador') ? (p.por_status?.reprovado ?? 0) + (p.por_status?.em_correcao ?? 0) : 0
+const corrigir = (p: any) => (p.meus_papeis.includes('disponibilizador') || p.meus_papeis.includes('administrador')) ? (p.por_status?.reprovado ?? 0) + (p.por_status?.em_correcao ?? 0) : 0
 const saudacao = computed(() => { const h = new Date().getHours(); return h < 12 ? 'Bom dia' : h < 18 ? 'Boa tarde' : 'Boa noite' })
 function criado(id: string) { novo.value = false; navigateTo(rotaProjeto(id, 'equipe')) }
 </script>

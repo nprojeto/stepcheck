@@ -22,7 +22,7 @@ const pid = computed(() => (route.params.id as string) || null)
 const itensProjeto = computed(() => {
   if (!pid.value) return []
   const papeis: string[] = projeto.value?.projeto.id === pid.value ? projeto.value.meus_papeis : []
-  const adm = !!me.value?.usuario.is_admin
+  const adm = !!me.value?.usuario.is_admin || papeis.includes('administrador')
   const b = '/projetos/' + pid.value
   const l = [
     { to: b, label: 'Visão geral', icon: LayoutDashboard, exato: true },

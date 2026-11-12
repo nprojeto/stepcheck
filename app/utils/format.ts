@@ -12,7 +12,7 @@ export const STATUS_ORDEM = ['em_elaboracao', 'disponibilizado', 'em_execucao', 
 export const STATUS_PROJETO: Record<string, string> = {
   planejamento: 'Planejamento', em_andamento: 'Em andamento', pausado: 'Pausado', concluido: 'Concluído', cancelado: 'Cancelado',
 }
-export const PAPEL: Record<string, string> = { disponibilizador: 'Disponibilizador', testador: 'Testador', aprovador: 'Aprovador' }
+export const PAPEL: Record<string, string> = { administrador: 'Administrador', disponibilizador: 'Disponibilizador', testador: 'Testador', aprovador: 'Aprovador' }
 export const RESULTADO: Record<string, string> = { sucesso: 'Sucesso', com_problemas: 'Com problemas' }
 export const CRITERIO: Record<string, string> = { ok: 'OK', falhou: 'Falhou', na: 'N/A' }
 
@@ -53,7 +53,7 @@ export function acaoAuditoria(a: string) {
     return 'Status → ' + (STATUS[para]?.label ?? para)
   }
   const mapa: Record<string, string> = {
-    criar: 'Criou', editar: 'Editou', excluir: 'Excluiu', equipe: 'Alterou a equipe', anexar: 'Anexou arquivo',
+    criar: 'Criou', editar: 'Editou', excluir: 'Excluiu', arquivar: 'Excluiu (arquivou)', restaurar: 'Restaurou', equipe: 'Alterou a equipe', anexar: 'Anexou arquivo',
     trocar_senha: 'Trocou a senha', redefinir_senha: 'Redefiniu senha', editar_perfil: 'Editou o perfil',
   }
   return mapa[a] ?? a

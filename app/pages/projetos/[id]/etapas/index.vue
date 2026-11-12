@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { Plus, Search, Layers, Pencil, Download } from 'lucide-vue-next'
+import { Plus, Search, Layers, Pencil, Download, Archive } from 'lucide-vue-next'
 const route = useRoute()
 const projeto = useProjeto()
 const d = computed(() => projeto.value!)
@@ -9,6 +9,7 @@ const filtroStatus = ref((route.query.status as string) ?? '')
 const filtroModulo = ref('')
 const novaEtapa = ref(false)
 const modModulos = ref(false)
+const verExcluidas = ref(false)
 
 onMounted(() => carregarProjeto(pid.value).catch(toastErro))
 watch(() => route.query.status, (s) => { filtroStatus.value = (s as string) ?? '' })
@@ -65,6 +66,7 @@ function exportar() {
     <div class="page-head">
       <div><h1>Etapas</h1><div class="sub">{{ d.etapas.length }} etapa(s) neste projeto.</div></div>
       <div class="row wrap">
+        <button v-if="d.pode.admin_projeto && d.etapas_arquivadas?.length" class="btn secondary" @click="verExcluidas = true"><Archive :size="16" /> Excluídas ({{ d.etapas_arquivadas.length }})</button>
         <button class="btn secondary" @click="modModulos = true"><Layers :size="16" /> Módulos</button>
         <button class="btn secondary" :disabled="!etapasFiltradas.length" @click="exportar"><Download :size="16" /> CSV</button>
         <button v-if="d.pode.criar_etapa" class="btn" @click="novaEtapa = true"><Plus :size="17" /> Nova etapa</button>
@@ -126,8 +128,21 @@ function exportar() {
         </table>
       </div>
     </AppModal>
+    <AppModal :open="verExcluidas" titulo="Etapas excluídas (arquivadas)" largura="760px" @close="verExcluidas = false">
+      <p class="muted">Etapas excluídas não aparecem nas listas, painéis e relatórios, mas todo o histórico continua guardado. Abra uma etapa para restaurá-la.</p>
+      <div class="table-wrap">
+        <table class="tbl">
+          <thead><tr><th>Nº</th><th>Etapa</th><th>Status ao excluir</th><th>Módulo</th></tr></thead>
+          <tbody>
+            <tr v-for="e in d.etapas_arquivadas" :key="e.id" class="clickable" @click="verExcluidas = false; abrir(e)">
+              <td class="muted">#{{ e.codigo }}</td><td class="strong">{{ e.nome }}</td><td><StatusBadge :status="e.status" curto /></td><td class="small muted">{{ e.modulo ?? '—' }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </AppModal>
     <StepForm :open="novaEtapa" :projeto-id="pid" :modulos="d.modulos" :membros="d.membros"
-              :pode-disponibilizar="d.meus_papeis.includes('disponibilizador')"
+              :pode-disponibilizar="d.meus_papeis.includes('disponibilizador') || d.pode.admin_projeto"
               :modulo-padrao="d.modulos.find((m: any) => m.nome === filtroModulo)?.id ?? null"
               @close="novaEtapa = false" @salvo="etapaCriada" />
   </div>

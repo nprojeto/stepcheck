@@ -11,7 +11,7 @@ onMounted(async () => {
 const minhas = computed(() => lista.value.filter((e) => e.posso_decidir))
 const outras = computed(() => lista.value.filter((e) => !e.posso_decidir))
 const link = (e: any) => rotaProjeto(pid.value, 'etapas/' + e.id)
-const ehAprovador = computed(() => projeto.value?.meus_papeis.includes('aprovador'))
+const ehAprovador = computed(() => projeto.value?.meus_papeis.includes('aprovador') || projeto.value?.pode.admin_projeto)
 </script>
 <template>
   <div>

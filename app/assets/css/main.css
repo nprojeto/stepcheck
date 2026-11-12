@@ -100,6 +100,7 @@ small, .small { font-size: 12px; }
 .btn.ghost:hover { background: var(--soft); }
 .btn.success { background: var(--ok); } .btn.success:hover { background: #116632; }
 .btn.danger { background: var(--danger); } .btn.danger:hover { background: #a11f1f; }
+.btn.ghost.danger-txt { color: var(--danger); }
 .btn.warn { background: var(--st-corr); } .btn.warn:hover { background: #9a330a; }
 .btn.sm { height: 31px; padding: 0 11px; font-size: 12.5px; }
 .btn.icon { width: 38px; padding: 0; }
@@ -156,6 +157,7 @@ table.tbl { width: 100%; border-collapse: collapse; font-size: 13px; }
 .badge.role-disponibilizador { background: #E6EEFF; color: #1D4BB8; }
 .badge.role-testador { background: #FEF3E2; color: #A14A07; }
 .badge.role-aprovador { background: #F1EAFE; color: #5B21B6; }
+.badge.role-administrador { background: var(--navy); color: #fff; }
 
 /* ---------- Progresso ---------- */
 .progress { height: 8px; background: var(--soft); border-radius: 99px; overflow: hidden; }
